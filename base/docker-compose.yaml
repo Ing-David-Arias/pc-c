@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  jenkins:
+    container_name: jenkins
+    image: jenkins/jenkins:lts-21
+    ports:
+      - 8080:8080
+      - 50000:50000
+    volumes:
+      - ./data/jenkins:/var/jenkins_home
+      - /run/user/0/podman/podman.sock:/var/run/podman/podman.sock #cambiar al docker
+    restart: unless-stopped
+    networks:
+      - devops_network
+
+  nexus:
+    container_name: nexus
+    image: sonatype/nexus3:latest
+    ports:
+      - 8081:8081
+      - 8085:8085
+      - 5000:5000
+    volumes:
+      - ./data/nexus:/nexus-data
+    restart: unless-stopped
+    networks:
+      - devops_network
+
+networks:
+  devops_network:
