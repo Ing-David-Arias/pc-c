@@ -1,0 +1,115 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1508.v9cb_c3a_a_89dfd">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2254.v2a_978de46f35"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2254.v2a_978de46f35">
+      <jobProperties/>
+      <triggers/>
+      <parameters>
+        <string>WEBLOGIC_HOST_PORT</string>
+        <string>WEBLOGIC_HOST_MONITOR</string>
+        <string>WEBLOGIC_TAG_VERSION</string>
+        <string>PROJECT_ID</string>
+      </parameters>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>PROJECT_ID</name>
+          <description>Nombre o ID del proyecto /n Ejemplo: nu1525</description>
+          <defaultValue>nu1525</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>WEBLOGIC_TAG_VERSION</name>
+          <description>Versión del tag del contenedor de WebLogic disponible: 12.2.1.4</description>
+          <defaultValue>12.2.1.4</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>WEBLOGIC_HOST_PORT</name>
+          <description>Puerto externo para WebLogic</description>
+          <defaultValue>7001</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>WEBLOGIC_HOST_MONITOR</name>
+          <description>Puerto externo para NodeManager</description>
+          <defaultValue>9002</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@4080.va_15b_44a_91525">
+    <script>pipeline {
+    agent any
+
+    parameters {
+        string(name: &apos;PROJECT_ID&apos;, defaultValue: &apos;nu1525&apos;, description: &apos;Nombre o ID del proyecto /n Ejemplo: nu1525&apos;)
+        string(name: &apos;WEBLOGIC_TAG_VERSION&apos;, defaultValue: &apos;12.2.1.4&apos;, description: &apos;Versión del tag del contenedor de WebLogic disponible: 12.2.1.4&apos;)
+        string(name: &apos;WEBLOGIC_HOST_PORT&apos;, defaultValue: &apos;7001&apos;, description: &apos;Puerto externo para WebLogic&apos;)
+        string(name: &apos;WEBLOGIC_HOST_MONITOR&apos;, defaultValue: &apos;9002&apos;, description: &apos;Puerto externo para NodeManager&apos;)
+    }
+
+    environment {
+        DOCKER_IMAGE = &quot;${params.WEBLOGIC_CONTAINER_NAME}:${params.WEBLOGIC_TAG_VERSION}&quot;
+        AZURE_REPO = &quot;https://darias:FrEVryWWGJXSmIpurkWpflMLYIOvmUmpyiS6zcIrDUY4a3YlDMRQJQQJ99BDACAAAAAmugoDAAAGAZDO3Fy0@dev.azure.com/darias0313/Pruebas/_git/poc-corfi&quot;
+        DATA_RUTE_LOCAL = &quot;/root/POC/jenkins-nexus/data/weblogic/&quot;
+        DATA_RUTE = &quot;${env.DATA_RUTE_LOCAL}&quot;+&quot;weblogic-&quot;+&quot;${PROJECT_ID}&quot;
+    }
+
+    stages {
+        stage(&apos;Clonar repositorio&apos;) {
+            steps {
+                git url: &quot;${env.AZURE_REPO}&quot;, branch: &apos;feature/test&apos;
+            }
+        }
+        
+        stage(&apos;Crear Volumen y Permisos&apos;) {
+            steps {
+                 script {
+                    sh &quot;&quot;&quot;
+                        pwd
+                        ls -ltra
+                        cd ${env.DATA_RUTE_LOCAL}
+                        ls -ltra
+                        mkdir -p weblogic-${PROJECT_ID}
+                        sudo chown -R 1000:1000 weblogic-${PROJECT_ID}
+                        sudo chmod 644 weblogic-${PROJECT_ID}
+                    &quot;&quot;&quot;
+                }
+            }
+        }
+        
+        stage(&apos;Ejecutar Docker Compose&apos;) {
+            steps {
+                script {
+                    sh &quot;&quot;&quot;
+                        cd weblogic
+                        sed -i &apos;s/{{PROJECT_ID}}/${PROJECT_ID}/g&apos; docker-compose.yaml
+                        sed -i &apos;s/{{WEBLOGIC_TAG_VERSION}}/${WEBLOGIC_TAG_VERSION}/g&apos; docker-compose.yaml
+                        sed -i &apos;s/{{WEBLOGIC_HOST_PORT}}/${WEBLOGIC_HOST_PORT}/g&apos; docker-compose.yaml
+                        sed -i &apos;s/{{WEBLOGIC_HOST_MONITOR}}/${WEBLOGIC_HOST_MONITOR}/g&apos; docker-compose.yaml
+                        sed -i &apos;s|{{DATA_RUTE}}|${DATA_RUTE}|g&apos; docker-compose.yaml
+                        export PATH=$PATH:$HOME/.local/bin &amp;&amp; podman-compose --version
+                        sudo chown 1000:1000 ./create_domain.py
+                        sudo chmod 644 ./create_domain.py
+                        podman-compose up -d
+                    &quot;&quot;&quot;
+                }
+            }
+        }
+    }
+}
+</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

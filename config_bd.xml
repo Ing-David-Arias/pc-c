@@ -1,0 +1,89 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1508.v9cb_c3a_a_89dfd">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2254.v2a_978de46f35"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2254.v2a_978de46f35">
+      <jobProperties/>
+      <triggers/>
+      <parameters>
+        <string>VERSION_DB</string>
+        <string>PROJECT_ID</string>
+      </parameters>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>PROJECT_ID</name>
+          <description>ID del Proyecto</description>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>VERSION_DB</name>
+          <description>Versión de Oracle DB</description>
+          <defaultValue>12.1.0.2</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@4080.va_15b_44a_91525">
+    <script>pipeline {
+    agent any
+
+    parameters {
+        string(name: &apos;PROJECT_ID&apos;, defaultValue: &apos;&apos;, description: &apos;ID del Proyecto&apos;)
+        string(name: &apos;VERSION_DB&apos;, defaultValue: &apos;12.1.0.2&apos;, description: &apos;Versión de Oracle DB&apos;)
+    }
+
+    environment {
+        AZURE_REPO = &quot;https://darias:FrEVryWWGJXSmIpurkWpflMLYIOvmUmpyiS6zcIrDUY4a3YlDMRQJQQJ99BDACAAAAAmugoDAAAGAZDO3Fy0@dev.azure.com/darias0313/Pruebas/_git/poc-corfi&quot;
+        DATA_RUTE_LOCAL = &quot;/root/POC/jenkins-nexus/data/oraclebd/&quot;
+        DATA_RUTE = &quot;${env.DATA_RUTE_LOCAL}&quot;+&quot;oraclebd-&quot;+&quot;${PROJECT_ID}&quot;
+    }
+
+    stages {
+        stage(&apos;Clonar repositorio&apos;) {
+            steps {
+                git url: &quot;${env.AZURE_REPO}&quot;, branch: &apos;feature/test&apos;
+            }
+        }
+        
+        stage(&apos;Crear Volumen y Permisos&apos;) {
+            steps {
+                 script {
+                    sh &quot;&quot;&quot;
+                        cd ${env.DATA_RUTE_LOCAL}
+                        ls -ltra
+                        mkdir -p oracledb-${PROJECT_ID}
+                        sudo chown -R 1000:1000 oracledb-${PROJECT_ID}
+                        sudo chmod 644 oracledb-${PROJECT_ID}
+                    &quot;&quot;&quot;
+                 }
+            }
+        }
+
+        stage(&apos;Levantar Oracle con Docker Compose&apos;) {
+            steps {
+                script {
+                    sh &quot;&quot;&quot;
+                        cd oracle-db
+                        sed -i &apos;s/{{PROJECT_ID}}/${PROJECT_ID}/g&apos; docker-compose.yaml
+                        sed -i &apos;s|{{DATA_RUTE}}|${DATA_RUTE}|g&apos; docker-compose.yaml
+                        export PATH=$PATH:$HOME/.local/bin &amp;&amp; podman-compose --version
+                        docker-compose up -d
+                    &quot;&quot;&quot;
+                }
+            }
+        }
+    }
+}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
