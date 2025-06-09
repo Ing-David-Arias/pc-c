@@ -1,0 +1,17 @@
+services:
+  oracle-db:
+    image:davido2/oracledb:latest
+    container_name: oracle-db
+    ports:
+      - "1521:1521"
+      - "8080:8080"
+    environment:
+      - ORACLE_PASSWORD=oracle
+      - APP_USER=app
+      - APP_USER_PASSWORD=app123
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    restart: always
+
+volumes:
+  oracle-data:

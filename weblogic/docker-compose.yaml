@@ -1,0 +1,26 @@
+services:
+  weblogic:
+    image: localhost:5000/assist-weblogic:{{WEBLOGIC_TAG_VERSION}}
+    container_name: weblogic12-{{PROJECT_ID}}
+    ports:
+      - "{{WEBLOGIC_HOST_PORT}}:7001"
+      - "{{WEBLOGIC_HOST_MONITOR}}:9002"
+    environment:
+      - DOMAIN_NAME=base_domain
+      - ADMIN_NAME=AdminServer
+      - ADMIN_PORT=7001
+      - ADMIN_USERNAME=weblogic
+      - ADMIN_PASSWORD=Welcome1
+      - ADMIN_LISTEN_ADDRESS=0.0.0.0
+      - ADMIN_HOST=0.0.0.0
+    volumes:
+      - {{DATA_RUTE}}:/u01/oracle/user_projects/domains/base_domain:Z
+      - ./create_domain.py:/opt/oracle/create_domain.py:Z
+    restart: unless-stopped
+    command: >
+      bash -c "
+        if [ ! -f /u01/oracle/user_projects/domains/base_domain/bin/startWebLogic.sh ]; then
+          /opt/oracle/middleware/wlserver/common/bin/wlst.sh /opt/oracle/create_domain.py &&
+          echo 'Dominio creado';
+        fi &&
+        /u01/oracle/user_projects/domains/base_domain/bin/startWebLogic.sh"
