@@ -16,5 +16,5 @@
 
     - name: Ejecutar script SQL en Oracle dentro del contenedor
       shell: |
-        podman exec -i {{ container_name | default('oracle-xe') }} \
+        podman exec -i {{ container_name }} \
           bash -c "echo '@/tmp/init.sql' | sqlplus {{ db_user }}/{{ db_password }}@{{ connect_string }}"
