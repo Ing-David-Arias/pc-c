@@ -1,17 +1,17 @@
 services:
   oracle-db:
-    image:davido2/oracledb:latest
-    container_name: oracle-db
+    image: localhost:5000/assist-oracledb:{{DB_TAG_VERSION}}
+    container_name: oracledb-21c-{{PROJECT_ID}}
     ports:
-      - "1521:1521"
-      - "8080:8080"
+      - "{{TNS_LISTEN_PORT}}:1521"
+      - "{{APEX_PORT}}:8080"
     environment:
-      - ORACLE_PASSWORD=oracle
-      - APP_USER=app
+      - ORACLE_PASSWORD=Oracle123
+      - APP_USER=appuser
       - APP_USER_PASSWORD=app123
     volumes:
-      - oracle-data:/opt/oracle/oradata
+      - oracle-data-{{PROJECT_ID}}:/opt/oracle/oradata
     restart: always
 
 volumes:
-  oracle-data:
+  oracle-data-{{PROJECT_ID}}:
