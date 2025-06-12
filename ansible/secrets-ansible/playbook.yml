@@ -1,0 +1,16 @@
+---
+- name: Desplegar app usando credenciales protegidas
+  hosts: target
+  become: no
+  vars_files:
+    - group_vars/vault.yml
+    - group_vars/all.yml
+
+  tasks:
+    - name: Mostrar usuario WebLogic (solo para demo)
+      debug:
+        msg: "Usuario WebLogic: {{ weblogic_username }}"
+
+    - name: Desplegar app (simulado)
+      shell: |
+        echo "Desplegando {{ app_name }} con {{ weblogic_username }}/{{ weblogic_password }} hacia {{ target_server }}"

@@ -1,0 +1,5 @@
+weblogic_username: weblogic
+weblogic_password: Welcome1
+oracle_db_user: system
+oracle_db_pass: OrclPass123
+api_token: supersecreto123

@@ -1,0 +1,68 @@
+---
+- name: Configurar nodo base para WebLogic y Jenkins
+  hosts: all
+  become: yes
+  vars:
+    weblogic_user: weblogic
+    java_package: java-1.8.0-openjdk
+    extra_dirs:
+      - /opt/scripts
+      - /u01
+      - /home/weblogic/scripts
+
+  tasks:
+
+    - name: Instalar paquetes base
+      package:
+        name:
+          - "{{ java_package }}"
+          - git
+          - unzip
+          - wget
+          - curl
+          - podman
+        state: present
+
+    - name: Crear usuario weblogic si no existe
+      user:
+        name: "{{ weblogic_user }}"
+        comment: "Usuario para WebLogic"
+        shell: /bin/bash
+        create_home: yes
+        state: present
+
+    - name: Agregar usuario al grupo podman
+      user:
+        name: "{{ weblogic_user }}"
+        groups: podman
+        append: yes
+      when: ansible_facts['os_family'] in ['RedHat', 'Fedora']
+
+    - name: Crear carpetas necesarias
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ weblogic_user }}"
+        mode: '0755'
+      loop: "{{ extra_dirs }}"
+
+    - name: Aumentar límites de archivos abiertos
+      copy:
+        dest: /etc/security/limits.d/weblogic.conf
+        content: |
+          {{ weblogic_user }} soft nofile 65536
+          {{ weblogic_user }} hard nofile 65536
+
+    - name: Habilitar configuraciones en sysctl
+      copy:
+        dest: /etc/sysctl.d/99-weblogic.conf
+        content: |
+          fs.file-max = 2097152
+
+    - name: Aplicar cambios de sysctl
+      command: sysctl --system
+      register: sysctl_output
+
+    - name: Mostrar resultado sysctl
+      debug:
+        var: sysctl_output.stdout_lines
