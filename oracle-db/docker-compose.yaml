@@ -1,6 +1,6 @@
 services:
   oracle-db:
-    image: localhost:5000/assist-oracledb:{{DB_TAG_VERSION}}
+    image: gvenzl/oracle-xe:{{DB_TAG_VERSION}}
     container_name: oracledb-21c-{{PROJECT_ID}}
     ports:
       - "{{TNS_LISTEN_PORT}}:1521"
