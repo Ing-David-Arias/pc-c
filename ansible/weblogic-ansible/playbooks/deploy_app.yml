@@ -2,6 +2,9 @@
 - name: Desplegar WAR en WebLogic
   hosts: weblogic
   become: true
+  roles:
+    - role: weblogic
+      tasks_from: deploy
   vars:
     admin_user: "weblogic"
     admin_pass: "Welcome1"

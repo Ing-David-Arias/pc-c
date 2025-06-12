@@ -1,0 +1,6 @@
+---
+- name: Copiar WAR al contenedor
+  copy:
+    src: files/myapp.war
+    dest: /u01/oracle/user_projects/domains/base_domain/autodeploy/myapp.war
+    mode: 0644
