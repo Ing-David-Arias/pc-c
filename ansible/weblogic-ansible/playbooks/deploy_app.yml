@@ -16,7 +16,7 @@
     - name: Desplegar la aplicación usando weblogic.Deployer
       shell: |
         podman exec {{WEBLOGIC_TARGET}} bash -c "
-        source /u01/oracle/wlserver/server/bin/setWLSEnv.sh &&
+        source /opt/oracle/middleware/wlserver/server/bin/setWLSEnv.sh &&
         java weblogic.Deployer \
           -adminurl t3://{{ weblogic_url }}:7001 \
           -username {{ admin_user }} \
