@@ -9,7 +9,7 @@ domain_path = '/u01/oracle/user_projects/domains/' + domain_name
 
 print('>>> Iniciando configuración de dominio WebLogic...')
 
-readTemplate("/u01/oracle/wlserver/common/templates/wls/wls.jar")
+readTemplate("/opt/oracle/middleware/wlserver/common/templates/wls/wls.jar")
 
 cd('Servers/AdminServer')
 set('ListenAddress', '')
