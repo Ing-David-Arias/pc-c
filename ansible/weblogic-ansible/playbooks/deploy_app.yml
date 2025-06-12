@@ -1,0 +1,14 @@
+---
+- name: Desplegar WAR en WebLogic
+  hosts: weblogic
+  become: true
+  vars:
+    admin_user: "weblogic"
+    admin_pass: "Welcome1"
+    war_file: "/u01/oracle/user_projects/domains/base_domain/autodeploy/myapp.war"
+  tasks:
+    - name: Copiar WAR al contenedor
+      copy:
+        src: ../files/myapp.war
+        dest: "{{ war_file }}"
+        mode: 0644

@@ -1,0 +1,18 @@
+---
+- name: Configurar dominio WebLogic
+  hosts: weblogic
+  become: true
+  vars:
+    admin_user: "weblogic"
+    admin_pass: "Welcome1"
+    wlst_script: "/u01/oracle/create_domain.py"
+  tasks:
+    - name: Copiar script WLST al contenedor
+      copy:
+        src: ../wlst/create_domain.py
+        dest: "{{ wlst_script }}"
+        mode: 0755
+
+    - name: Ejecutar script WLST en el contenedor
+      shell: |
+        podman exec weblogic bash -c "source /u01/oracle/wlserver/server/bin/setWLSEnv.sh && java weblogic.WLST {{ wlst_script }}"
