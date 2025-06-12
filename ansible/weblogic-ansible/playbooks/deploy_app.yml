@@ -5,7 +5,7 @@
   vars:
     admin_user: "weblogic"
     admin_pass: "Welcome1"
-    war_file: "/u01/oracle/user_projects/domains/base_domain/autodeploy/myapp.war"
+    war_file: "/u01/oracle/user_projects/domains/base_domain/autodeploy/"
     weblogic_url: "{{ lookup('env', 'WEBLOGIC_URL') }}"
   tasks:
     - name: Validations
