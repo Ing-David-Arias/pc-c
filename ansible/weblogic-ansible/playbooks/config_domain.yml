@@ -16,4 +16,4 @@
 
     - name: Ejecutar script WLST en el contenedor
       shell: |
-        podman exec weblogic bash -c "source /u01/oracle/wlserver/server/bin/setWLSEnv.sh && java weblogic.WLST {{ wlst_script }}"
+        podman exec {{WEBLOGIC_TARGET}} bash -c "source /u01/oracle/wlserver/server/bin/setWLSEnv.sh && java weblogic.WLST {{ wlst_script }}"
