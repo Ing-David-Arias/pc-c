@@ -8,6 +8,12 @@
     war_file: "/u01/oracle/user_projects/domains/base_domain/autodeploy/myapp.war"
     weblogic_url: "{{ lookup('env', 'WEBLOGIC_URL') }}"
   tasks:
+    - name: Validations
+      shell: |
+        whoami
+        pwd
+        ls -ltra
+
     - name: Copiar WAR al contenedor
       copy:
         src: ../files/myapp.war
