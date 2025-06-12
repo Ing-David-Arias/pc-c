@@ -6,7 +6,7 @@
     domain_name: "mydomain"
     admin_user: "weblogic"
     admin_pass: "Welcome1"
-    wlst_script: "/u01/oracle/create_domain.py"
+    wlst_script: "/tmp/create_domain.py"
   tasks:
     - name: Copiar script WLST al contenedor
       copy:
