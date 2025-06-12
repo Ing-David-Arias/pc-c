@@ -1,18 +1,27 @@
-# create_domain.py
+# Script WLST para crear un dominio básico
 
-print('>>> Iniciando la creación del dominio...')
+import sys
+
+admin_username = 'weblogic'
+admin_password = 'Welcome1'
+domain_name = 'mydomain'
+domain_path = '/u01/oracle/user_projects/domains/' + domain_name
+
+print('>>> Iniciando configuración de dominio WebLogic...')
 
 readTemplate("/u01/oracle/wlserver/common/templates/wls/wls.jar")
+
 cd('Servers/AdminServer')
-set('ListenAddress', 'localhost')
+set('ListenAddress', '')
 set('ListenPort', 7001)
 
 cd('/')
 cd('Security/base_domain/User/weblogic')
-cmo.setPassword('Welcome1')
+cmo.setPassword(admin_password)
 
 setOption('OverwriteDomain', 'true')
-writeDomain('/u01/oracle/user_projects/domains/base_domain')
+writeDomain(domain_path)
 closeTemplate()
 
-print('>>> Dominio creado exitosamente')
+print('>>> Dominio creado en: ' + domain_path)
+exit()

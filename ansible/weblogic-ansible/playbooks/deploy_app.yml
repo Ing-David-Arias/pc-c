@@ -2,16 +2,23 @@
 - name: Desplegar WAR en WebLogic
   hosts: weblogic
   become: true
-  roles:
-    - role: weblogic
-      tasks_from: deploy
   vars:
     admin_user: "weblogic"
     admin_pass: "Welcome1"
     war_file: "/u01/oracle/user_projects/domains/base_domain/autodeploy/myapp.war"
+    weblogic_url: "{{ lookup('env', 'WEBLOGIC_URL') }}"
   tasks:
     - name: Copiar WAR al contenedor
       copy:
         src: ../files/myapp.war
         dest: "{{ war_file }}"
-        mode: 0644
+
+    - name: Desplegar la aplicación usando weblogic.Deployer
+      shell: |
+        podman exec weblogic bash -c "
+        source /u01/oracle/wlserver/server/bin/setWLSEnv.sh &&
+        java weblogic.Deployer \
+          -adminurl t3://{{ weblogic_url }}:7001 \
+          -username {{ admin_user }} \
+          -password {{ admin_pass }} \
+          -deploy -name myApp -source {{ war_file }} -targets AdminServer"

@@ -2,10 +2,8 @@
 - name: Configurar dominio WebLogic
   hosts: weblogic
   become: true
-  roles:
-    - role: weblogic
-      tasks_from: domain_config
   vars:
+    domain_name: "mydomain"
     admin_user: "weblogic"
     admin_pass: "Welcome1"
     wlst_script: "/u01/oracle/create_domain.py"
